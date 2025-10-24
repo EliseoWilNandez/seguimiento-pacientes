@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from "vue";
+import { reactive, computed } from "vue";
 import Alerta from "./Alerta.vue";
 
 const alerta = reactive({
@@ -7,27 +7,71 @@ const alerta = reactive({
   mensaje: "",
 });
 
-defineEmits(['update:nombre','update:propietario','update:email','update:alta','update:sintomas'])
+const emit = defineEmits([
+  "update:nombre",
+  "update:propietario",
+  "update:email",
+  "update:alta",
+  "update:sintomas",
+  "guardar-paciente",
+]);
 
 const props = defineProps({
-    nombre: {
-        type: String,
-        required: true
-    }
-})
+  id: {
+    type: [String, null],
+    required: true,
+  },
+  nombre: {
+    type: String,
+    required: true,
+  },
+  propietario: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  alta: {
+    type: String,
+    required: true,
+  },
+  sintomas: {
+    type: String,
+    required: true,
+  },
+});
 
 const validar = () => {
-  if (Object.values(paciente).includes("")) {
+  if (Object.values(props).includes("")) {
     (alerta.mensaje = "Todos los campos son obligatorios"), (alerta.tipo = "error");
     return;
   }
 
-  console.log("agregando");
+  emit("guardar-paciente");
+
+  alerta.mensaje = "Paciente Almacenado Correctamente";
+  alerta.tipo = "exito";
+
+  setTimeout(() => {
+    Object.assign(alerta, {
+      tipo: "",
+      mensaje: "",
+    });
+  }, 3000);
 };
+
+const editando = computed (() => {
+  return props.id
+})
+
 </script>
+
 <template>
   <div class="md:w-1/2">
     <h2 class="text-3xl font-black text-center">Seguimiento Pacientes</h2>
+
     <p class="text-lg mt-5 text-center mb-10">
       Añade Pacientes y <span class="text-indigo-600 font-bold">Adminístralos</span>
     </p>
@@ -40,7 +84,6 @@ const validar = () => {
       method="get"
       class="bg-white shadow-md rounded-lg py-10 px-5 mb-10"
     >
-    {{ nombre }}
       <!-- MANERA 1 CON UN INLINEHADLER -->
       <div class="mb-5">
         <label for="mascota" class="block text-gray-700 uppercase font-bold"
@@ -51,6 +94,7 @@ const validar = () => {
           type="text"
           placeholder="Nombre de la Mascota"
           class="w-full border-2 mt-2 p-2 placeholder-gray-400 rounded-md"
+          :value="nombre"
           @input="$emit('update:nombre', $event.target.value)"
         />
       </div>
@@ -65,7 +109,8 @@ const validar = () => {
           type="text"
           placeholder="Nombre del propietario"
           class="w-full border-2 mt-2 p-2 placeholder-gray-400 rounded-md"
-          
+          :value="propietario"
+          @input="$emit('update:propietario', $event.target.value)"
         />
       </div>
 
@@ -76,7 +121,8 @@ const validar = () => {
           type="email"
           placeholder="Introduce tu email"
           class="w-full border-2 mt-2 p-2 placeholder-gray-400 rounded-md"
-          
+          :value="email"
+          @input="$emit('update:email', $event.target.value)"
         />
       </div>
 
@@ -86,7 +132,8 @@ const validar = () => {
           id="alta"
           type="date"
           class="w-full border-2 mt-2 p-2 placeholder-gray-400 rounded-md"
-          
+          :value="alta"
+          @input="$emit('update:alta', $event.target.value)"
         />
       </div>
 
@@ -98,14 +145,15 @@ const validar = () => {
           id="sintomas"
           placeholder="Describe los sintomas de tu paciente"
           class="w-full border-2 mt-2 p-2 placeholder-gray-400 rounded-md h-20"
-          
+          :value="sintomas"
+          @input="$emit('update:sintomas', $event.target.value)"
         />
       </div>
 
       <input
         class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors"
         type="submit"
-        value="Registrar Paciente"
+        :value="[editando ? 'Guardar Cambios' : 'Registrar Paciente']"
       />
     </form>
   </div>
